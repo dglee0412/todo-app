@@ -2,9 +2,11 @@
 {
     public enum TodoStatus
     {
-        Pending = 0,      // 진행 전/진행중
-        Completed = 1     // 완료
+        NotStarted = 0,
+        InProgress = 1,
+        Completed = 2
     }
+
     public enum TodoPriority
     {
         Low = 0,
