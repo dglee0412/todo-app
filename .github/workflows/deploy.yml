@@ -38,9 +38,21 @@ jobs:
         run: |
           az containerapp up \
             --name $CONTAINER_APP \
-            --resource-group $RESOURCE_GROUP \
+            --resource-group $RESOURCE_GROUP \            
             --environment $CONTAINER_ENV \
             --image $ACR_NAME.azurecr.io/$IMAGE_NAME:${{ github.sha }} \
             --target-port 8080 \
             --ingress external \
             --registry-server $ACR_NAME.azurecr.io
+      
+      - name: Set DB connection string
+        run: |
+          az containerapp secret set \
+            --name $CONTAINER_APP \
+            --resource-group $RESOURCE_GROUP \
+            --secrets db-conn="${{ secrets.DB_CONNECTION_STRING }}"
+
+          az containerapp update \
+            --name $CONTAINER_APP \
+            --resource-group $RESOURCE_GROUP \
+            --set-env-vars "ConnectionStrings__DefaultConnection=secretref:db-conn"
