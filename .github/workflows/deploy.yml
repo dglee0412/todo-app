@@ -45,14 +45,16 @@ jobs:
             --ingress external \
             --registry-server $ACR_NAME.azurecr.io
       
-      - name: Set DB connection string
+      - name: Set DB connection string and JWT key
         run: |
           az containerapp secret set \
             --name $CONTAINER_APP \
             --resource-group $RESOURCE_GROUP \
-            --secrets db-conn="${{ secrets.DB_CONNECTION_STRING }}"
+            --secrets db-conn="${{ secrets.DB_CONNECTION_STRING }}" \
+              jwt-key="${{ secrets.Jwt__Key}}" 
 
           az containerapp update \
             --name $CONTAINER_APP \
             --resource-group $RESOURCE_GROUP \
-            --set-env-vars "ConnectionStrings__DefaultConnection=secretref:db-conn"
+            --set-env-vars "ConnectionStrings__DefaultConnection=secretref:db-conn" \
+              "Jwt__Key=secretref:jwt-key"

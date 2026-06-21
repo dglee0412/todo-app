@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using TodoApi.Data;
 using TodoApi.Dtos;
 using TodoApi.Models;
@@ -8,21 +11,24 @@ using TodoApi.Models;
 namespace TodoApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] 
+    [Route("api/[controller]")]
+    [Authorize]
     public class TodosController : ControllerBase
     {
         private readonly AppDbContext _db;
         public TodosController(AppDbContext db) => _db = db;
 
         // 임시 사용자 ID — Phase 2에서 로그인 토큰 기반으로 교체
-        private const int TempUserId = 1;
+        //private const int CurrentUserId = 1;
+
+        private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         // GET /api/todos — 목록
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoResponseDto>>> GetAll()
         {
             var todos = await _db.Todos
-                              .Where(t => t.UserId == TempUserId)
+                              .Where(t => t.UserId == CurrentUserId)
                               .OrderByDescending(t => t.CreatedAt)
                               .Select(t => ToDto(t))
                               .ToListAsync();
@@ -35,7 +41,7 @@ namespace TodoApi.Controllers
         public async Task<ActionResult<TodoResponseDto>> GetById(int id)
         {
             var todo = await _db.Todos
-                            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == TempUserId);
+                            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == CurrentUserId);
 
             if (todo is null)
                 return NotFound();
@@ -54,7 +60,7 @@ namespace TodoApi.Controllers
                 Priority = dto.Priority,
                 DueDate = dto.DueDate,
                 Status = TodoStatus.NotStarted,
-                UserId = TempUserId,
+                UserId = CurrentUserId,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -68,7 +74,7 @@ namespace TodoApi.Controllers
         public async Task<IActionResult> Update(int id, UpdateTodoTdo dto)
         {
             var todo = await _db.Todos
-                            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == TempUserId);
+                            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == CurrentUserId);
 
             if(todo is null) return NotFound();
 
@@ -87,7 +93,7 @@ namespace TodoApi.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var todo = await _db.Todos
-                             .FirstOrDefaultAsync(t => t.Id == id && t.UserId == TempUserId);
+                             .FirstOrDefaultAsync(t => t.Id == id && t.UserId == CurrentUserId);
 
             if(todo is null) return NotFound();
 
