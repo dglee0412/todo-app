@@ -1,2 +1,7 @@
-﻿bin/
-obj/
+﻿**/node_modules
+**/bin
+**/obj
+**/dist
+.git
+.github
+*.md

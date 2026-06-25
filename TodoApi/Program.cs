@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(option =>
         Scheme = "Bearer",
         BearerFormat = "Jwt",
         In = ParameterLocation.Header,
-        Description = "JWT 토큰을 입력하세요 (Bearer 접두사 없이 토큰만)"
+        Description = "Enter JWT token only (without 'Bearer' prefix)"
     });
 
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -40,6 +40,14 @@ builder.Services.AddSwaggerGen(option =>
             },
             Array.Empty<string>()
         }
+    });
+});
+
+builder.Services.AddCors(option =>
+{
+    option.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
     });
 });
 
@@ -67,10 +75,15 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseCors("AllowFrontend");
 app.UseAuthentication(); //토큰 검증 (순서 중요!) 너 누구냐?
 app.UseAuthorization(); //권한 확인
 
 app.MapGet("/health", () => new { status = "ok" });
 app.MapControllers();
+app.MapFallbackToFile("index.html"); 
 
 app.Run();
