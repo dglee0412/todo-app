@@ -25,7 +25,7 @@ ASP.NET Core와 React로 구현한 JWT 인증 기반 Todo 관리 애플리케이
 
 | 로그인 | 할 일 관리 |
 |---|---|
-| ![로그인](doc/images/login.png) | ![할 일 관리](doc/images/todos.png) |
+| ![로그인](Doc/images/login.png) | ![할 일 관리](Doc/images/todos.png) |
 
 ## 개요
 
